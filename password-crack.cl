@@ -6,7 +6,7 @@ void passwordCrack(__global char* password, __global char* crackedPassword, int 
 
 //if (gi == 1) {
 	int found = 0;
-	int tempCrackPassword[4];
+	int tempCrackPassword[5];
 
 	int start = (maxScanSize/gs) * gi;
 	int end = start + (maxScanSize / gs) - 1;

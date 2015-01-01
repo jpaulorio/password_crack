@@ -13,7 +13,7 @@
 #define MEM_SIZE (128)
 #define MAX_SOURCE_SIZE (0x100000)
 
-#define PASSWORD_SIZE (3)
+#define PASSWORD_SIZE (4)
 #define LAST_CHAR (127)
 
 int ipow(int base, int exp)
