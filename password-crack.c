@@ -10,44 +10,53 @@
 #include <CL/cl.h>
 #endif
 
-#define PASSWORD_SIZE (100)
-#define FIRST_CHAR (33)
+#define PASSWORD_SIZE (4)
+#define FIRST_CHAR (0)
 #define LAST_CHAR (127)
 
 int main ()
 {
   time_t t1;
   time_t t2;
-  time(&t1);
 
   printf("Type a password: ");
 
-  char password[PASSWORD_SIZE];
-  char crackedPassword[PASSWORD_SIZE];
+  char password[PASSWORD_SIZE+1];
+  char crackedPassword[PASSWORD_SIZE+1];
+
+  int tempCrackPassword[PASSWORD_SIZE+1];
+  for (int i = 0; i < PASSWORD_SIZE+1; i++) {
+    tempCrackPassword[i] = 0;
+  }
 
   scanf("%s", &password);
 
+  time(&t1);
   printf("Cracking password\n");
 
   int cracked = 0;
   while (!cracked) {
-    printf("%s\n",crackedPassword);
-
-    crackedPassword[0]++;
-    for (int i = 0; i < PASSWORD_SIZE - 1; i++) {        
-      if (crackedPassword[i] == LAST_CHAR) {
-        crackedPassword[i] = FIRST_CHAR;
-        if (crackedPassword[i+1] == 0) {
-          crackedPassword[i+1] = FIRST_CHAR;
-        } else {
-          crackedPassword[i+1]++;
-        }
-      }        
+    for (int i=0; i<PASSWORD_SIZE + 1; i++) {
+      crackedPassword[i] = tempCrackPassword[i];
     }
-
+    
     if (strcmp(password,crackedPassword) == 0) {
       cracked = 1;
+      break;      
     }
+
+    for (int i = 0; i < PASSWORD_SIZE; i++) {      
+        if (tempCrackPassword[i] == (LAST_CHAR + 1)) {
+          tempCrackPassword[i] = 0;
+          tempCrackPassword[i+1]++;
+        }        
+    }
+
+    tempCrackPassword[0]++;
+  }
+
+  for (int i=0; i<PASSWORD_SIZE + 1; i++) {
+      crackedPassword[i] = tempCrackPassword[i];
   }
 
   printf("\nPassword is: %s\n", crackedPassword);
