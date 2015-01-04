@@ -10,7 +10,7 @@
 #include <CL/cl.h>
 #endif
 
-#define PASSWORD_SIZE (4)
+#define PASSWORD_SIZE (5)
 #define FIRST_CHAR (0)
 #define LAST_CHAR (127)
 
