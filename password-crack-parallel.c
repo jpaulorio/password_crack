@@ -98,6 +98,10 @@ int main ()
   // Copy the lists A and B to their respective memory buffers
   ret = clEnqueueWriteBuffer(command_queue, memobjInput, CL_TRUE, 0, sizeof(char) * (PASSWORD_SIZE+1), password, 0, NULL, NULL);
  
+  if (ret != CL_SUCCESS) {
+    printf("\n Error number %d", ret);
+  }
+
   /* Create Kernel Program from the source */
   program = clCreateProgramWithSource(context, 1, (const char **)&source_str, (const size_t *)&source_size, &ret);
  
