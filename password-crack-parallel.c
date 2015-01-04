@@ -16,9 +16,9 @@
 #define PASSWORD_SIZE (4)
 #define LAST_CHAR (127)
 
-int ipow(int base, int exp)
+unsigned long ipow(int base, int exp)
 {
-    int result = 1;
+    unsigned long result = 1;
     while (exp)
     {
         if (exp & 1)
@@ -32,9 +32,11 @@ int ipow(int base, int exp)
 
 int main ()
 {
+  char build_c[4096];
   time_t t1;
   time_t t2;
-  time(&t1);
+
+  size_t maxKernelWorkGroupSize;
 
   int passwordSize = PASSWORD_SIZE;
   int lastChar = LAST_CHAR;
@@ -46,9 +48,10 @@ int main ()
 
   scanf("%s", &password);
 
+  time(&t1);
   printf("Cracking password\n");
-  int maxScanSize = ipow(LAST_CHAR + 1, PASSWORD_SIZE);
-
+  unsigned long maxScanSize = ipow(LAST_CHAR + 1, PASSWORD_SIZE);
+  //printf("maxScanSize->%lu\n", maxScanSize);
 ////////////////////
 
   cl_device_id device_id = NULL;
@@ -93,7 +96,7 @@ int main ()
   memobjOutput = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(char) * (PASSWORD_SIZE+1), NULL, &ret);
 
   // Copy the lists A and B to their respective memory buffers
-  ret = clEnqueueWriteBuffer(command_queue, memobjInput, CL_TRUE, 0, sizeof(char)*PASSWORD_SIZE, password, 0, NULL, NULL);
+  ret = clEnqueueWriteBuffer(command_queue, memobjInput, CL_TRUE, 0, sizeof(char) * (PASSWORD_SIZE+1), password, 0, NULL, NULL);
  
   /* Create Kernel Program from the source */
   program = clCreateProgramWithSource(context, 1, (const char **)&source_str, (const size_t *)&source_size, &ret);
@@ -101,19 +104,33 @@ int main ()
   /* Build Kernel Program */
   ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
  
+ if ( ret != CL_SUCCESS ) {
+                printf( "Error on buildProgram " );
+                printf("\n Error number %d", ret);
+                fprintf( stdout, "\nRequestingInfo\n" );
+                clGetProgramBuildInfo( program, device_id, CL_PROGRAM_BUILD_LOG, 4096, build_c, NULL );
+                printf( "Build Log for %s_program:\n%s\n", "example", build_c );
+        }
+
   /* Create OpenCL Kernel */
   kernel = clCreateKernel(program, "passwordCrack", &ret);
  
+  // print max kernel work group size
+  clGetKernelWorkGroupInfo(kernel, device_id, CL_KERNEL_WORK_GROUP_SIZE,
+          sizeof(maxKernelWorkGroupSize), &maxKernelWorkGroupSize, NULL);
+  printf("Max kernel work group size: %lu\n", maxKernelWorkGroupSize);
+
+
   /* Set OpenCL Kernel Arguments */
   ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&memobjInput);
   ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&memobjOutput);
-  ret = clSetKernelArg(kernel, 2, sizeof(int), (void *)&maxScanSize);  
+  ret = clSetKernelArg(kernel, 2, sizeof(unsigned long), (void *)&maxScanSize);  
   ret = clSetKernelArg(kernel, 3, sizeof(int), (void *)&passwordSize);  
   ret = clSetKernelArg(kernel, 4, sizeof(int), (void *)&lastChar);
   
   /* Set kernel dimensions */
-  size_t globalThreads[1] = {200};
-  size_t localThreads[1] = {100};
+  size_t globalThreads[1] = {512*512};
+  size_t localThreads[1] = {512};
  
   /* Execute OpenCL Kernel */  
   clEnqueueNDRangeKernel(command_queue, kernel, 1, 0, globalThreads, localThreads, 0, 0, 0);

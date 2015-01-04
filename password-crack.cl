@@ -1,33 +1,59 @@
+int skip(int a[], ulong length, int base);
+int compare(char a[], int b[]);
+
 __kernel
-void passwordCrack(__global char* password, __global char* crackedPassword, int maxScanSize, int passwordSize, int lastChar)
+void passwordCrack(__global char* password, __global char* crackedPassword, ulong maxScanSize, int passwordSize, int lastChar)
 {
-	int gs = get_global_size(0);
-	int gi = get_global_id(0);
+	ulong wd = get_work_dim();
+	ulong gs = get_global_size(0);
+	ulong gi = get_global_id(0);
 
-//if (gi == 1) {
+//if (gi == 0) {
 	int found = 0;
+	char tempPassword[5];
 	int tempCrackPassword[5];
+	for (int i = 0; i < 5; i++) {
+		tempCrackPassword[i] = 0;
+		tempPassword[i] = password[i];
+	}
 
-	int start = (maxScanSize/gs) * gi;
-	int end = start + (maxScanSize / gs) - 1;
+	ulong start = (maxScanSize/gs) * gi;
+	ulong end = start + (maxScanSize / gs) - 1;
 
 	if (maxScanSize % 2 == 1) {
 		end = end + 1;
 	}
 
-	// printf("start->%d\n", start);
-	// printf("end->%d\n", end);
-	// printf("lastChar->%d\n", lastChar);
-
-	skip(tempCrackPassword, start, lastChar);
+	//if (gi == gs-10321) {
+	//if (gi > gs-15433 && gi < gs-10320) {
+	//if (gi > 245730 && gi < gs) {
+		// printf("maxScanSize->%lu\n", maxScanSize);
+		// printf("start->%lu\n", start);
+		// printf("end->%lu\n", end);
+		// printf("lastChar->%lu\n", lastChar);
+		// printf("gs->%lu\n", gs);
+		// printf("gi->%lu\n", gi);
+		// printf("wd->%lu\n", wd);
+	
+	
+	skip(tempCrackPassword, start, lastChar + 1);
 	
 	// printf("c0->%d\n",tempCrackPassword[0]);
 	// printf("c1->%d\n",tempCrackPassword[1]);
-	// printf("c2->%d\n---------\n",tempCrackPassword[2]);
-
-	for (int j = start; j < end; j++) {
+	// printf("c2->%d\n",tempCrackPassword[2]);
+	// printf("c3->%d\n---------\n",tempCrackPassword[3]);
 	
-		if (compare(password,tempCrackPassword) == 0) {
+	for (ulong j = start; j < end; j++) {
+
+	 // printf("a0->%d\n",tempCrackPassword[0]);
+	 // printf("a1->%d\n",tempCrackPassword[1]);
+	 // printf("a2->%d\n",tempCrackPassword[2]);
+	 // printf("a3->%d\n---------\n",tempCrackPassword[3]);
+	
+		//if (tempCrackPassword[0] == 122 && tempCrackPassword[1] == 122 && tempCrackPassword[2] == 122
+		//	&& tempCrackPassword[3] == 122) {
+		if (compare(tempPassword, tempCrackPassword) == 0) {
+			//printf("j->%d-gi->%d-value->%d-start->%lu-end->%lu\n", j, gi, tempCrackPassword[3], start, end);
 			found = 1;
 		  	break;
 		}
@@ -48,46 +74,30 @@ void passwordCrack(__global char* password, __global char* crackedPassword, int 
 		}
 	}
 
-	 // printf("a0->%d\n",crackedPassword[0]);
-	 // printf("a1->%d\n",crackedPassword[1]);
-	 // printf("a2->%d\n---------\n",crackedPassword[2]);
+	 // printf("a0->%d\n",tempCrackPassword[0]);
+	 // printf("a1->%d\n",tempCrackPassword[1]);
+	 // printf("a2->%d\n",tempCrackPassword[2]);
+	 // printf("a3->%d\n---------\n",tempCrackPassword[3]);
 
 //}
  }
 
-int skip(int a[], int length, int lastChar){
-	int result = length / (lastChar+1);
-	int mod = length % (lastChar+1);
+int skip(int a[], ulong length, int base){
+
+	ulong m = length;
+	ulong n = base;
+	ulong s = 0;
 	int count = 0;
 
-	while (result > 0) {
-		// printf("count->%d\n",count);
-		// printf("result->%d\n",result);
-		// printf("mod->%d\n",mod);
-		a[count] += mod;
-
-		mod = result % (lastChar+1);
-		result = result / (lastChar+1);
+	while (m >= n) {
+		s = m % n;
+		a[count] = s;
+		m = m / n;
 		count++;
 	}
-	a[count] += mod;	
-
-	// printf("count->%d\n",count);
-	// printf("result->%d\n",result);
-	// printf("mod->%d\n",mod);
-	// printf("a0->%d\n",a[0]);
-	// printf("a1->%d\n",a[1]);
-	// printf("a2->%d\n",a[2]);
+	a[count] = m;
 
 	return 0;
-}
-
-int strlen(char a[]) {
-	int result = 0;
-	while (a[result] != '\0') {
-		result++;
-	}
-	return result;
 }
 
 int compare(char a[], int b[])
