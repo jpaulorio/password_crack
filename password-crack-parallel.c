@@ -13,7 +13,8 @@
 #define MEM_SIZE (128)
 #define MAX_SOURCE_SIZE (0x100000)
 
-#define PASSWORD_SIZE (4)
+#define PAGE_SIZE (16)
+#define PASSWORD_SIZE (5)
 #define LAST_CHAR (127)
 
 unsigned long ipow(int base, int exp)
@@ -40,6 +41,7 @@ int main ()
 
   int passwordSize = PASSWORD_SIZE;
   int lastChar = LAST_CHAR;
+  int pageSize = PAGE_SIZE;
 
   printf("Type a password: ");
 
@@ -109,12 +111,12 @@ int main ()
   ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
  
  if ( ret != CL_SUCCESS ) {
-                printf( "Error on buildProgram " );
-                printf("\n Error number %d", ret);
-                fprintf( stdout, "\nRequestingInfo\n" );
-                clGetProgramBuildInfo( program, device_id, CL_PROGRAM_BUILD_LOG, 4096, build_c, NULL );
-                printf( "Build Log for %s_program:\n%s\n", "example", build_c );
-        }
+    printf( "Error on buildProgram " );
+    printf("\n Error number %d", ret);
+    fprintf( stdout, "\nRequestingInfo\n" );
+    clGetProgramBuildInfo( program, device_id, CL_PROGRAM_BUILD_LOG, 4096, build_c, NULL );
+    printf( "Build Log for %s_program:\n%s\n", "example", build_c );
+  }
 
   /* Create OpenCL Kernel */
   kernel = clCreateKernel(program, "passwordCrack", &ret);
@@ -131,16 +133,24 @@ int main ()
   ret = clSetKernelArg(kernel, 2, sizeof(unsigned long), (void *)&maxScanSize);  
   ret = clSetKernelArg(kernel, 3, sizeof(int), (void *)&passwordSize);  
   ret = clSetKernelArg(kernel, 4, sizeof(int), (void *)&lastChar);
+  ret = clSetKernelArg(kernel, 5, sizeof(int), (void *)&pageSize);
   
   /* Set kernel dimensions */
-  size_t globalThreads[1] = {512*512};
+  size_t globalThreads[1] = {512*512*128};
   size_t localThreads[1] = {512};
  
+  for (int i = 0; i<pageSize; i++) {
+    ret = clSetKernelArg(kernel, 6, sizeof(int), (void *)&i);
   /* Execute OpenCL Kernel */  
-  clEnqueueNDRangeKernel(command_queue, kernel, 1, 0, globalThreads, localThreads, 0, 0, 0);
+    clEnqueueNDRangeKernel(command_queue, kernel, 1, 0, globalThreads, localThreads, 0, 0, 0);
 
   /* Copy results from the memory buffer */
-  ret = clEnqueueReadBuffer(command_queue, memobjOutput, CL_TRUE, 0, (PASSWORD_SIZE + 1) * sizeof(char), &crackedPassword, 0, NULL, NULL);  
+    ret = clEnqueueReadBuffer(command_queue, memobjOutput, CL_TRUE, 0, (PASSWORD_SIZE + 1) * sizeof(char), &crackedPassword, 0, NULL, NULL);
+
+    if (crackedPassword[0] != 0) {
+      break;
+    }
+  }
 
   ret = clFlush(command_queue);
   ret = clFinish(command_queue);

@@ -2,23 +2,23 @@ int skip(int a[], ulong length, int base);
 int compare(char a[], int b[]);
 
 __kernel
-void passwordCrack(__global char* password, __global char* crackedPassword, ulong maxScanSize, int passwordSize, int lastChar)
+void passwordCrack(__global char* password, __global char* crackedPassword, ulong maxScanSize, int passwordSize, int lastChar, int pageSize, int pageIndex)
 {
 	ulong wd = get_work_dim();
 	ulong gs = get_global_size(0);
 	ulong gi = get_global_id(0);
 
-//if (gi == 0) {
+//if (gi == 0 && pageIndex == 0) {
 	int found = 0;
-	char tempPassword[5];
-	int tempCrackPassword[5];
-	for (int i = 0; i < 5; i++) {
+	char tempPassword[6];
+	int tempCrackPassword[6];
+	for (int i = 0; i < 6; i++) {
 		tempCrackPassword[i] = 0;
 		tempPassword[i] = password[i];
 	}
 
-	ulong start = (maxScanSize/gs) * gi;
-	ulong end = start + (maxScanSize / gs) - 1;
+	ulong start = (((maxScanSize/pageSize)/gs) * gi) + ((maxScanSize/pageSize) * pageIndex);
+	ulong end = start + ((maxScanSize/pageSize)/gs) - 1;
 
 	if (maxScanSize % 2 == 1) {
 		end = end + 1;
@@ -28,11 +28,12 @@ void passwordCrack(__global char* password, __global char* crackedPassword, ulon
 	//if (gi > gs-15433 && gi < gs-10320) {
 	//if (gi > 245730 && gi < gs) {
 		// printf("maxScanSize->%lu\n", maxScanSize);
+		// printf("index->%lu\n", pageIndex);
 		// printf("start->%lu\n", start);
 		// printf("end->%lu\n", end);
 		// printf("lastChar->%lu\n", lastChar);
 		// printf("gs->%lu\n", gs);
-		// printf("gi->%lu\n", gi);
+//		printf("gi->%lu\n", gi);
 		// printf("wd->%lu\n", wd);
 	
 	
