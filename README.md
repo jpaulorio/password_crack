@@ -1,5 +1,5 @@
-# password_crack
-## Naive OpenCL implementation of a brute force password cracker.
+# Password Crack
+### Naive OpenCL implementation of a brute force password cracker.
 
 To build the parallel version on Mac just:
 
@@ -9,4 +9,4 @@ To build the serial version on Mac just:
 
 **_gcc password-crack.c -o bin/password-crack -framework OpenCL_**
 
-Just run the generated binaries from within the bin directory and enter the password to be "cracked" when requested.
+Just run the generated binaries _from within the bin directory_ and enter the password to be "cracked" when requested.
