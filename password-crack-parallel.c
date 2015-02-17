@@ -49,6 +49,10 @@ int main ()
   char crackedPassword[PASSWORD_SIZE + 1];
 
   scanf("%s", &password);
+  if (strlen(password) > PASSWORD_SIZE) {
+    printf("Password size must not exceed %d characters.\n", PASSWORD_SIZE);
+    exit(-1);
+  }
 
   time(&t1);
   printf("Cracking password\n");
