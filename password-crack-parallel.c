@@ -69,7 +69,7 @@ int main ()
   cl_int ret;
  
   FILE *fp;
-  char fileName[] = "./password-crack.cl";
+  char fileName[] = "../password-crack.cl";
   char *source_str;
   size_t source_size;
 
