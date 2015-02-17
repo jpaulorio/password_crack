@@ -36,6 +36,7 @@ int main ()
   char build_c[4096];
   time_t t1;
   time_t t2;
+  int pageIndex;
 
   size_t maxKernelWorkGroupSize;
 
@@ -139,8 +140,9 @@ int main ()
   size_t globalThreads[1] = {512*512*128};
   size_t localThreads[1] = {512};
  
-  for (int i = 0; i<pageSize; i++) {
-    ret = clSetKernelArg(kernel, 6, sizeof(int), (void *)&i);
+  //for (int i = 0; i<pageSize; i++) {
+    pageIndex = 0;
+    ret = clSetKernelArg(kernel, 6, sizeof(int), (void *)&pageIndex);
   /* Execute OpenCL Kernel */  
     clEnqueueNDRangeKernel(command_queue, kernel, 1, 0, globalThreads, localThreads, 0, 0, 0);
 
@@ -150,7 +152,7 @@ int main ()
     if (crackedPassword[0] != 0) {
       break;
     }
-  }
+  //}
 
   ret = clFlush(command_queue);
   ret = clFinish(command_queue);
