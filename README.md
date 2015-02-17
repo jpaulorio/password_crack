@@ -3,7 +3,7 @@
 
 To build the parallel version on Mac just:
 
-**_gcc password-crack-parallel.c -o bin/password-crack-parallel -framework OpenCL_*
+**_gcc password-crack-parallel.c -o bin/password-crack-parallel -framework OpenCL_**
 
 To build the serial version on Mac just:
 
