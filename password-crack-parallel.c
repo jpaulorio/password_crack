@@ -13,7 +13,7 @@
 #define MEM_SIZE (128)
 #define MAX_SOURCE_SIZE (0x100000)
 
-#define PAGE_SIZE (16)
+#define SLICE_SIZE (16)
 #define PASSWORD_SIZE (5)
 #define LAST_CHAR (127)
 
@@ -41,14 +41,14 @@ int main ()
 
   int passwordSize = PASSWORD_SIZE;
   int lastChar = LAST_CHAR;
-  int pageSize = PAGE_SIZE;
+  int pageSize = SLICE_SIZE;
 
   printf("Type a password: ");
 
   char password[PASSWORD_SIZE + 1];
   char crackedPassword[PASSWORD_SIZE + 1];
 
-  scanf("%s", &password);
+  scanf("%s", password);
   if (strlen(password) > PASSWORD_SIZE) {
     printf("Password size must not exceed %d characters.\n", PASSWORD_SIZE);
     exit(-1);
