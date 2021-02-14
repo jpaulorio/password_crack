@@ -57,8 +57,6 @@ int main ()
   time(&t1);
   printf("Cracking password\n");
   unsigned long maxScanSize = ipow(LAST_CHAR + 1, PASSWORD_SIZE);
-  //printf("maxScanSize->%lu\n", maxScanSize);
-////////////////////
 
   cl_device_id device_id = NULL;
   cl_context context = NULL;
@@ -90,6 +88,7 @@ int main ()
   /* Get Platform and Device Info */
   ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
   ret = clGetDeviceIDs( platform_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &ret_num_devices);
+  printf("No of devices %d", ret_num_devices);
  
   /* Create OpenCL context */
   context = clCreateContext( NULL, 1, &device_id, NULL, NULL, &ret);
@@ -118,8 +117,18 @@ int main ()
     printf( "Error on buildProgram " );
     printf("\n Error number %d", ret);
     fprintf( stdout, "\nRequestingInfo\n" );
-    clGetProgramBuildInfo( program, device_id, CL_PROGRAM_BUILD_LOG, 4096, build_c, NULL );
-    printf( "Build Log for %s_program:\n%s\n", "example", build_c );
+
+    // Determine the size of the log
+    size_t log_size;
+    clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
+
+    // Allocate memory for the log
+    char *log = (char *) malloc(log_size);
+
+    // Get the log
+    clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, log_size, log, NULL);
+
+    printf( "Build Log for %s_program:\n%s\n", "example", log );
   }
 
   /* Create OpenCL Kernel */
